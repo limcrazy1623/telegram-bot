@@ -42,12 +42,27 @@ BIBLE_VERSES = [
     "Hãy đứng vững, chớ rúng động, hãy làm công việc Chúa cách dư dật luôn, vì biết rằng công khó của anh em trong Chúa chẳng phải là vô ích. – 1 Cô-rinh-tô 15:58"
 ]
 
-# Xử lý khi người dùng yêu cầu một câu Kinh Thánh
-@bot.message_handler(func=lambda message: "khích lệ tôi bằng một câu kinh thánh" in message.text.lower())
-def send_bible_verse(message):
-    verse = random.choice(BIBLE_VERSES)
-    bot.reply_to(message, verse)
+# Biến lưu trạng thái xem tin nhắn trước có phải "câu kinh thánh" không
+last_message_was_bible_request = {}
 
+@bot.message_handler(func=lambda message: message.text.lower() == "câu kinh thánh")
+def send_bible_verse_first(message):
+    global last_message_was_bible_request
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Ok Sếp, tôi sẽ khích lệ Sếp bằng một câu Kinh Thánh")
+    bot.send_message(chat_id, random.choice(BIBLE_VERSES))
+    last_message_was_bible_request[chat_id] = True  # Đánh dấu tin nhắn trước là yêu cầu câu Kinh Thánh
+
+@bot.message_handler(func=lambda message: message.text.lower() == "câu nữa")
+def send_bible_verse_again(message):
+    global last_message_was_bible_request
+    chat_id = message.chat.id
+    if last_message_was_bible_request.get(chat_id, False):  # Kiểm tra xem tin nhắn trước có phải là "câu kinh thánh" không
+        bot.send_message(chat_id, "Vâng!")
+        bot.send_message(chat_id, random.choice(BIBLE_VERSES))
+    else:
+        bot.send_message(chat_id, "Sếp muốn một câu Kinh Thánh à? Hãy nói 'câu kinh thánh' trước nhé!")
+    last_message_was_bible_request[chat_id] = True  # Đánh dấu tin nhắn này là yêu cầu câu Kinh Thánh
 # Danh sách câu trả lời ngẫu nhiên
 RANDOM_REPLIES = [
     "Dạ sếp, em có thể giúp gì ạ? 😊",
