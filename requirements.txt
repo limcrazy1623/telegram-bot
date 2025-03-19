@@ -3,3 +3,4 @@ requests
 schedule
 gspread
 oauth2client
+python-telegram-bot
