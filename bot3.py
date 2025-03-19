@@ -2,6 +2,9 @@ import telebot
 import requests
 import random
 import os
+from datetime import datetime
+import schedule
+import time
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
@@ -85,5 +88,51 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 @bot.message_handler(func=lambda message: message.text.lower() in THANKS_MESSAGES)
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
+# Danh sách bài học Kinh Thánh theo ngày
+lessons = {
+    "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
+    "21-3-2025": "Theo Chúa Sẽ Được Chỉ?",
+    "22-3-2025": "Lòng Thương Xót Của Chúa",
+    "23-3-2025": "Trở Nên Khôn Ngoan",
+    "24-3-2025": "Nguồn cậy Trông Của Tôi",
+    "25-3-2025": "Chúa Chẳng Bao Giờ Từ Bỏ",
+    "26-3-2025": "Thực Hành Lời Chúa",
+    "27-3-2025": "Làm Thầy",
+    "28-3-2025": "Quyền Của Lưỡi",
+    "29-3-2025": "Công Dân Sống Đẹp Lòng Chúa",
+    "30-3-2025": "Tiếp Nhận và Thực Hành Sự Khôn Ngoan",
+    "31-3-2025": "Nhận Biệt Để Sống Xứng Đáng"
+}
+# Xử lý lệnh /start và /help
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.reply_to(message, "Chào sếp! Nhập /baocao để nhận báo cáo hoặc /homnay để nhận bài học hôm nay.")
+# Hàm gửi bài học Kinh Thánh hằng ngày vào lúc 5h30 sáng
+def send_daily_lesson():
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+
+    # Thay "YOUR_CHAT_ID" bằng ID của bạn
+    chat_id = "6416693025"
+    message = f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}"
+    bot.send_message(chat_id, message)
+
+# Đặt lịch gửi thông báo hàng ngày vào lúc 5h30 sáng
+def send_daily_lesson():
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+
+    # Thay "YOUR_CHAT_ID" bằng ID của bạn
+    chat_id = "6416693025"
+    message = f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}"
+    bot.send_message(chat_id, message)
+
+# Đặt lịch trình
+schedule.every().day.at("05:30").do(send_daily_lesson)
+
+# Vòng lặp để thực thi các công việc định kỳ
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
 bot.polling(none_stop=True, interval=0)
