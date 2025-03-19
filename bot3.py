@@ -32,6 +32,7 @@ lessons = {
 # Xử lý lệnh /start và /help
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
+    print(f"Đã nhận lệnh: {message.text}")  # Log lệnh nhận được
     bot.reply_to(message, "Chào sếp! Nhập /baocao để nhận báo cáo hoặc /homnay để nhận bài học hôm nay.")
 
 # Xử lý lệnh /baocao để lấy báo cáo từ Google Sheets
@@ -40,6 +41,8 @@ def send_report(message):
     chat_id = message.chat.id
     bot.send_message(chat_id, "📊 Đang tạo báo cáo, vui lòng chờ...")
 
+    print(f"Đã nhận lệnh: {message.text}")  # Log lệnh nhận được
+    
     try:
         response = requests.get(APP_SCRIPT_URL)
         bot.send_message(chat_id, f"📢 Báo cáo: {response.text}")
@@ -76,6 +79,8 @@ schedule.every().day.at("05:30").do(send_daily_lesson)
 # Hàm trả lời khi người dùng hỏi bài học hôm nay
 @bot.message_handler(commands=['homnay'])
 def send_today_lesson(message):
+    print(f"Đã nhận lệnh: {message.text}")  # Log lệnh nhận được
+    
     today = datetime.today().strftime('%d-%m-%Y')
     lesson = lessons.get(today, "Hôm nay không có bài học.")
     bot.reply_to(message, f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}")
@@ -93,6 +98,8 @@ SIMPLE_MESSAGES = ["alo", "hi", "hello", "ê", "chào", "ok", "hê"]
 
 @bot.message_handler(func=lambda message: message.text.lower() in SIMPLE_MESSAGES)
 def random_reply(message):
+    print(f"Đã nhận tin nhắn: {message.text}")  # Log tin nhắn nhận được
+    
     reply = random.choice(RANDOM_REPLIES)
     bot.reply_to(message, reply)
 
@@ -101,6 +108,8 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 
 @bot.message_handler(func=lambda message: message.text.lower() in THANKS_MESSAGES)
 def thanks_reply(message):
+    print(f"Đã nhận tin nhắn: {message.text}")  # Log tin nhắn nhận được
+    
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
 
 # Chạy bot và kiểm tra lịch gửi thông báo
