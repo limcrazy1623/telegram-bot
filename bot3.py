@@ -6,10 +6,9 @@ from datetime import datetime
 import schedule
 import time
 import threading  # Thêm thư viện threading
-import base64
 import gspread
-import telegram
 from oauth2client.service_account import ServiceAccountCredentials
+import telegram
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
@@ -95,7 +94,6 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
 
-
 # Danh sách bài học Kinh Thánh theo ngày
 lessons = {
     "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
@@ -176,11 +174,6 @@ def run_schedule_and_bot():
 # Tạo một thread cho schedule
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import telegram
-import time
-
 # Cấu hình Google Sheets API
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
@@ -218,6 +211,5 @@ check_for_new_customer.last_checked_row = 0
 while True:
     check_for_new_customer()
     time.sleep(60)  # Kiểm tra mỗi phút
-
 # Chạy bot polling
 bot.polling(none_stop=True, interval=0)
