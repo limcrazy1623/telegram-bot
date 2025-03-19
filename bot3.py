@@ -93,7 +93,9 @@ def thanks_reply(message):
 
 from datetime import datetime
 import telebot
-import random
+import schedule
+import time
+import threading
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
@@ -129,18 +131,42 @@ def send_today_lesson(message):
 # Xử lý lệnh /baihoc theo ngày nhập từ người dùng
 @bot.message_handler(commands=['baihoc'])
 def send_lesson_by_date(message):
-    # Lấy ngày người dùng nhập vào
     try:
         date_requested = message.text.strip().split(' ')[1]
     except IndexError:
         bot.reply_to(message, "Vui lòng nhập ngày theo định dạng: /baihoc dd-mm-yyyy")
         return
     
-    # Kiểm tra bài học theo ngày
     lesson = lessons.get(date_requested, "Không có bài học cho ngày này.")
-    
-    # Gửi phản hồi với bài học tương ứng
     bot.reply_to(message, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({date_requested}) là: {lesson}")
+
+# Hàm gửi bài học tự động hàng ngày
+def send_daily_lesson():
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+    # Thay đổi ID người nhận (chat_id) thành ID của bạn hoặc nhóm bạn muốn gửi
+    chat_id = '6416693025'
+    bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({today}) là: {lesson}")
+
+# Đặt lịch gửi thông báo hàng ngày vào lúc 5h00 sáng
+schedule.every().day.at("05:00").do(send_daily_lesson)
+
+# Hàm chạy đồng thời schedule và bot.polling
+def run_schedule_and_bot():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+# Tạo một thread cho schedule
+schedule_thread = threading.Thread(target=run_schedule_and_bot)
+schedule_thread.start()
+
+# Hàm gửi bài học Kinh Thánh hằng ngày vào lúc 5h00 sáng
+def send_daily_lesson():
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+    chat_id = "6416693025"  # Thay chat_id của bạn
+    bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}")
 
 # Đặt lịch gửi thông báo hàng ngày vào lúc 5h30 sáng
 schedule.every().day.at("05:00").do(send_daily_lesson)
