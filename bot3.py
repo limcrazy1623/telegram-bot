@@ -1,7 +1,9 @@
+import time
+import schedule
 import telebot
-import requests
 import random
-import os
+import requests
+from datetime import datetime
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
@@ -11,17 +13,33 @@ APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHVTygxz9HgTgpq8KfHO2
 
 print("Bot đang chạy...")
 
+# Danh sách bài học Kinh Thánh theo ngày
+lessons = {
+    "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
+    "21-3-2025": "Theo Chúa Sẽ Được Chỉ?",
+    "22-3-2025": "Lòng Thương Xót Của Chúa",
+    "23-3-2025": "Trở Nên Khôn Ngoan",
+    "24-3-2025": "Nguồn cậy Trông Của Tôi",
+    "25-3-2025": "Chúa Chẳng Bao Giờ Từ Bỏ",
+    "26-3-2025": "Thực Hành Lời Chúa",
+    "27-3-2025": "Làm Thầy",
+    "28-3-2025": "Quyền Của Lưỡi",
+    "29-3-2025": "Công Dân Sống Đẹp Lòng Chúa",
+    "30-3-2025": "Tiếp Nhận và Thực Hành Sự Khôn Ngoan",
+    "31-3-2025": "Nhận Biệt Để Sống Xứng Đáng"
+}
+
 # Xử lý lệnh /start và /help
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    bot.reply_to(message, "Chào sếp! Nhập /baocao để nhận báo cáo.")
+    bot.reply_to(message, "Chào sếp! Nhập /baocao để nhận báo cáo hoặc /homnay để nhận bài học hôm nay.")
 
 # Xử lý lệnh /baocao để lấy báo cáo từ Google Sheets
 @bot.message_handler(commands=['baocao'])
 def send_report(message):
     chat_id = message.chat.id
     bot.send_message(chat_id, "📊 Đang tạo báo cáo, vui lòng chờ...")
-    
+
     try:
         response = requests.get(APP_SCRIPT_URL)
         bot.send_message(chat_id, f"📢 Báo cáo: {response.text}")
@@ -42,27 +60,26 @@ BIBLE_VERSES = [
     "Hãy đứng vững, chớ rúng động, hãy làm công việc Chúa cách dư dật luôn, vì biết rằng công khó của anh em trong Chúa chẳng phải là vô ích. – 1 Cô-rinh-tô 15:58"
 ]
 
-# Biến lưu trạng thái xem tin nhắn trước có phải "câu kinh thánh" không
-last_message_was_bible_request = {}
+# Hàm gửi bài học Kinh Thánh hằng ngày vào lúc 5h30 sáng
+def send_daily_lesson():
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
 
-@bot.message_handler(func=lambda message: message.text.lower() == "câu kinh thánh")
-def send_bible_verse_first(message):
-    global last_message_was_bible_request
-    chat_id = message.chat.id
-    bot.send_message(chat_id, "Ok Sếp, tôi sẽ khích lệ Sếp bằng một câu Kinh Thánh")
-    bot.send_message(chat_id, random.choice(BIBLE_VERSES))
-    last_message_was_bible_request[chat_id] = True  # Đánh dấu tin nhắn trước là yêu cầu câu Kinh Thánh
+    # Thay "YOUR_CHAT_ID" bằng ID của bạn
+    chat_id = "6416693025"
+    message = f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}"
+    bot.send_message(chat_id, message)
 
-@bot.message_handler(func=lambda message: message.text.lower() == "câu nữa")
-def send_bible_verse_again(message):
-    global last_message_was_bible_request
-    chat_id = message.chat.id
-    if last_message_was_bible_request.get(chat_id, False):  # Kiểm tra xem tin nhắn trước có phải là "câu kinh thánh" không
-        bot.send_message(chat_id, "Vâng!")
-        bot.send_message(chat_id, random.choice(BIBLE_VERSES))
-    else:
-        bot.send_message(chat_id, "Sếp muốn một câu Kinh Thánh à? Hãy nói 'câu kinh thánh' trước nhé!")
-    last_message_was_bible_request[chat_id] = True  # Đánh dấu tin nhắn này là yêu cầu câu Kinh Thánh
+# Đặt lịch gửi thông báo hàng ngày vào lúc 5h30 sáng
+schedule.every().day.at("05:30").do(send_daily_lesson)
+
+# Hàm trả lời khi người dùng hỏi bài học hôm nay
+@bot.message_handler(commands=['homnay'])
+def send_today_lesson(message):
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+    bot.reply_to(message, f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}")
+
 # Danh sách câu trả lời ngẫu nhiên
 RANDOM_REPLIES = [
     "Dạ sếp, em có thể giúp gì ạ? 😊",
@@ -86,4 +103,12 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
 
+# Chạy bot và kiểm tra lịch gửi thông báo
+def run_bot():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == "__main__":
+    run_bot()
 bot.polling(none_stop=True, interval=0)
