@@ -91,6 +91,13 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
 
+from datetime import datetime
+import telebot
+import random
+
+TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
+bot = telebot.TeleBot(TOKEN)
+
 # Danh sách bài học Kinh Thánh theo ngày
 lessons = {
     "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
