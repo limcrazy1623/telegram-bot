@@ -6,9 +6,7 @@ from datetime import datetime
 import schedule
 import time
 import threading  # Thêm thư viện threading
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import telegram
+
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
@@ -94,6 +92,7 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
 
+
 # Danh sách bài học Kinh Thánh theo ngày
 lessons = {
     "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
@@ -174,42 +173,6 @@ def run_schedule_and_bot():
 # Tạo một thread cho schedule
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
-# Cấu hình Google Sheets API
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
-client = gspread.authorize(creds)
-sheet = client.open('Milkkidsstudio').worksheet('DATA')  # Chọn đúng sheet "DATA"
 
-# Cấu hình Telegram bot
-bot = telegram.Bot(token='TOKEN_BOT')
-
-def check_for_new_customer():
-    # Lấy tất cả dữ liệu trong sheet
-    customers = sheet.get_all_records()
-
-    # Kiểm tra khách hàng mới (Dễ dàng dựa vào số dòng trong sheet)
-    last_row = len(customers)
-    if last_row > check_for_new_customer.last_checked_row:
-        new_customer = customers[last_row - 1]
-        
-        # Lấy thông tin từ các cột
-        customer_name = new_customer['TÊN KHÁCH HÀNG']  # Cột 4
-        total_amount = new_customer['TỔNG TIỀN']  # Cột 22
-        package_name = new_customer['TÊN GÓI CHỤP']  # Cột 28
-        
-        # Tạo thông báo
-        message = f"📢 Có khách hàng mới:\n\n👤 Tên: {customer_name}\nGói Chụp: {package_name}\n💰 Tổng Tiền: {total_amount} VND"
-        
-        # Gửi thông báo qua Telegram
-        bot.send_message(chat_id='6416693025', text=message)
-
-        # Cập nhật dòng đã kiểm tra
-        check_for_new_customer.last_checked_row = last_row
-
-check_for_new_customer.last_checked_row = 0
-
-while True:
-    check_for_new_customer()
-    time.sleep(60)  # Kiểm tra mỗi phút
 # Chạy bot polling
 bot.polling(none_stop=True, interval=0)
