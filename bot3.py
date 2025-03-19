@@ -107,14 +107,24 @@ lessons = {
     "31-3-2025": "Nhận Biệt Để Sống Xứng Đáng"
 }
 
-# Xử lý lệnh /homnay để trả lời bài học Kinh Thánh theo ngày hôm nay
+# Xử lý lệnh /homnay để gửi bài học hôm nay
 @bot.message_handler(commands=['homnay'])
-def send_todays_lesson(message):
+def send_today_lesson(message):
     today = datetime.today().strftime('%d-%m-%Y')
-    lesson = lessons.get(today, "Hôm nay không có bài học Kinh Thánh nào.")
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+    bot.reply_to(message, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({today}) là: {lesson}")
 
-    chat_id = message.chat.id
-    bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}")
+# Xử lý lệnh /baihoc theo ngày nhập từ người dùng
+@bot.message_handler(commands=['baihoc'])
+def send_lesson_by_date(message):
+    # Lấy ngày người dùng nhập vào
+    date_requested = message.text.strip().split(' ')[1]
+    
+    # Kiểm tra bài học theo ngày
+    lesson = lessons.get(date_requested, "Không có bài học cho ngày này.")
+    
+    # Gửi phản hồi với bài học tương ứng
+    bot.reply_to(message, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({date_requested}) là: {lesson}")
 # Hàm gửi bài học Kinh Thánh hằng ngày vào lúc 5h00 sáng
 def send_daily_lesson():
     today = datetime.today().strftime('%d-%m-%Y')
