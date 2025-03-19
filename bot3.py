@@ -107,13 +107,14 @@ lessons = {
     "31-3-2025": "Nhận Biệt Để Sống Xứng Đáng"
 }
 
-# Xử lý lệnh /homnay để gửi bài học Kinh Thánh hôm nay
+# Xử lý lệnh /homnay để trả lời bài học Kinh Thánh theo ngày hôm nay
 @bot.message_handler(commands=['homnay'])
-def send_today_lesson(message):
+def send_todays_lesson(message):
     today = datetime.today().strftime('%d-%m-%Y')
-    lesson = lessons.get(today, "Hôm nay không có bài học.")
-    bot.send_message(message.chat.id, f"Vậy, hôm nay ({today}) bài học của bạn là: {lesson}")
+    lesson = lessons.get(today, "Hôm nay không có bài học Kinh Thánh nào.")
 
+    chat_id = message.chat.id
+    bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}")
 # Hàm gửi bài học Kinh Thánh hằng ngày vào lúc 5h00 sáng
 def send_daily_lesson():
     today = datetime.today().strftime('%d-%m-%Y')
