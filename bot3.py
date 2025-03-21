@@ -146,10 +146,6 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
 
-<<<<<<< HEAD
-# Chạy bot
-=======
-
 # Danh sách bài học Kinh Thánh theo ngày
 lessons = {
     "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
@@ -232,5 +228,5 @@ schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
 
 # Chạy bot polling
->>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
+(Updated bot3.py, removed credentials.json, and modified requirements.txt)
 bot.polling(none_stop=True, interval=0)
