@@ -220,5 +220,4 @@ schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
 
 # Chạy bot polling
-(Updated bot3.py, removed credentials.json, and modified requirements.txt)
 bot.polling(none_stop=True, interval=0)
