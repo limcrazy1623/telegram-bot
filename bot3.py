@@ -210,34 +210,39 @@ def send_daily_lesson():
 schedule.every().day.at("05:00").do(send_daily_lesson)
 
 def find_bible_verse(book, chapter, verse):
-    BIBLE_FILE = "kinh_thanh_updated.txt"
-    current_book = None
-    current_chapter = None
-    found_verse = None
+    with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
+        lines = f.readlines()
 
-    with open(BIBLE_FILE, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+    found_book = False
+    found_chapter = False
 
-            # Nếu dòng là tên sách (ví dụ: "Sáng-thế Ký")
-            if not line.startswith("Chương") and not line[0].isdigit():
-                current_book = line  # Lưu lại tên sách
+    for line in lines:
+        line = line.strip()
 
-            # Nếu dòng là số chương (ví dụ: "Chương 1")
-            elif line.startswith("Chương"):
-                current_chapter = line.split()[1]  # Lấy số chương
+        if not line:
+            continue
 
-            # Nếu dòng bắt đầu bằng số câu (ví dụ: "1 Ban đầu...")
-            elif line[0].isdigit():
-                parts = line.split(" ", 1)
-                verse_number = parts[0]
-                verse_text = parts[1] if len(parts) > 1 else ""
+        # Tìm sách (chính xác hơn)
+        if line.lower() == book.lower():
+            found_book = True
+            found_chapter = False  # Reset chương nếu tìm thấy sách mới
+            continue
 
-                if current_book == book and current_chapter == str(chapter) and verse_number == str(verse):
-                    found_verse = f"{book} {chapter}:{verse} {verse_text}"
-                    break  # Dừng lại khi tìm thấy
+        # Tìm chương (chính xác hơn)
+        if found_book and line.lower() == f"chương {chapter}".lower():
+            found_chapter = True
+            continue
 
-    return found_verse if found_verse else "📖 Xin lỗi, tôi không tìm thấy câu này."
+        # Tìm câu
+        if found_chapter:
+            parts = line.split(maxsplit=1)  # Tách câu thành số câu và nội dung
+            if parts and parts[0].isdigit() and int(parts[0]) == verse:
+                return line
+
+    return "Không tìm thấy câu Kinh Thánh này."
+
+# Ví dụ tìm kiếm
+print(find_bible_verse("Thi-thiên", 23, 1))
 
 
 # Hàm chạy đồng thời schedule và bot.polling
