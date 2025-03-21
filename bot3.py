@@ -6,11 +6,10 @@ from datetime import datetime
 import schedule
 import time
 import threading  # Thêm thư viện threading
-<<<<<<< HEAD
 import pytz
-=======
 
->>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
+
+
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
@@ -19,10 +18,7 @@ bot = telebot.TeleBot(TOKEN)
 APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHVTygxz9HgTgpq8KfHO2bcsE9j3IoV3mk1kFBwbl35qmRTLKvi7nEvrXrj09nzsGUsA/exec"
 
 print("Bot đang chạy...")
-<<<<<<< HEAD
-=======
 
->>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
 # Xử lý lệnh /start và /help
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -39,7 +35,6 @@ def send_report(message):
         bot.send_message(chat_id, f"📢 Báo cáo: {response.text}")
     except Exception as e:
         bot.send_message(chat_id, f"❌ Lỗi: {str(e)}")
-<<<<<<< HEAD
 # Danh sách bài học
 lessons = {
     "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
@@ -84,9 +79,6 @@ def send_daily_lesson():
 
 # Đặt lịch gửi thông báo hàng ngày vào lúc 5h00 sáng
 schedule.every().day.at("05:00").do(send_daily_lesson)
-=======
->>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
-
 # Danh sách câu Kinh Thánh động viên
 BIBLE_VERSES = [
     "Ta làm được mọi sự nhờ Đấng ban thêm sức cho ta. – Phi-líp 4:13",
