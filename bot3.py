@@ -220,39 +220,47 @@ def run_schedule_and_bot():
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
 
-TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
-bot = telebot.TeleBot(TOKEN)
-
-# Hàm tìm câu Kinh Thánh
 def find_bible_verse(book, chapter, verse):
     with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     found_book = False
     found_chapter = False
+    found_verse = False
+    verse_text = ""
 
     for line in lines:
         line = line.strip()
-        
+
         if not line:  # Nếu dòng trống, bỏ qua
             continue
 
-        if line.lower().startswith(book.lower()):  # Tìm đúng tên sách
+        # Tìm sách
+        if line.lower() == book.lower():
             found_book = True
-            found_chapter = False  # Reset chương nếu tìm thấy sách mới
+            found_chapter = False
             continue
 
-        if found_book and line.startswith(f"Chương {chapter}"):  # Tìm đúng chương
+        # Tìm chương
+        if found_book and line.lower() == f"chương {chapter}".lower():
             found_chapter = True
             continue
 
+        # Tìm câu
         if found_chapter:
-            parts = line.split(" ", 1)  # Tách câu thành số câu và nội dung
+            parts = line.split(" ", 1)  # Tách số câu và nội dung
             if len(parts) > 1 and parts[0].isdigit() and int(parts[0]) == verse:
-                return line
+                found_verse = True
+                verse_text = parts[1]
+                continue
 
-    return "Không tìm thấy câu Kinh Thánh này."
+            # Nếu đã tìm thấy câu, tiếp tục nối các dòng tiếp theo
+            if found_verse:
+                if line[0].isdigit():  # Nếu dòng mới bắt đầu bằng số, tức là câu mới -> dừng lại
+                    break
+                verse_text += " " + line  # Nối thêm nội dung
 
+    return f"{book} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
 # Lệnh /start
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
