@@ -218,31 +218,43 @@ def find_bible_verse(book, chapter, verse):
 
     for line in lines:
         line = line.strip()
-
-        if not line:
+        
+        if not line:  # Nếu dòng trống, bỏ qua
             continue
 
-        # Tìm sách (chính xác hơn)
-        if line.lower() == book.lower():
+        if line.lower().startswith(book.lower()):  # Tìm đúng tên sách
             found_book = True
             found_chapter = False  # Reset chương nếu tìm thấy sách mới
             continue
 
-        # Tìm chương (chính xác hơn)
-        if found_book and line.lower() == f"chương {chapter}".lower():
+        if found_book and line.startswith(f"Chương {chapter}"):  # Tìm đúng chương
             found_chapter = True
             continue
 
-        # Tìm câu
         if found_chapter:
-            parts = line.split(maxsplit=1)  # Tách câu thành số câu và nội dung
-            if parts and parts[0].isdigit() and int(parts[0]) == verse:
+            parts = line.split(" ", 1)  # Tách câu thành số câu và nội dung
+            if len(parts) > 1 and parts[0].isdigit() and int(parts[0]) == verse:
                 return line
 
     return "Không tìm thấy câu Kinh Thánh này."
 
-# Ví dụ tìm kiếm
-print(find_bible_verse("Thi-thiên", 23, 1))
+@bot.message_handler(commands=['bible'])
+def get_bible_verse(message):
+    try:
+        query = message.text.replace('/bible ', '').strip()
+        parts = query.split(" ")
+
+        if len(parts) < 2 or ":" not in parts[1]:
+            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu\nVí dụ: /bible Thi-thiên 23:1")
+            return
+
+        book = parts[0]
+        chapter, verse = map(int, parts[1].split(":"))
+        verse_text = find_bible_verse(book, chapter, verse)
+
+        bot.reply_to(message, f"📖 {verse_text}")
+    except Exception as e:
+        bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 
 
 # Hàm chạy đồng thời schedule và bot.polling
