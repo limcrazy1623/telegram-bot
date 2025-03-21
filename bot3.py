@@ -293,7 +293,7 @@ def get_bible_verses(message):
         chapter = int(chapter)
 
         # 🔥 Giới hạn số câu trả về tối đa là 5
-        verse_texts = find_bible_verses(book, chapter, verses, max_verses=5)
+        verse_texts = find_bible_verses(book, chapter, verses, max_verses=2)
 
         send_long_message(message.chat.id, f"📖 {verse_texts}")
 
