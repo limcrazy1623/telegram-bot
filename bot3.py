@@ -112,8 +112,6 @@ def send_bible_verse_again(message):
         bot.send_message(chat_id, "Sếp muốn một câu Kinh Thánh à? Hãy nói 'câu kinh thánh' trước nhé!")
     last_message_was_bible_request[chat_id] = True  # Đánh dấu tin nhắn này là yêu cầu câu Kinh Thánh
 
-]
-
 # Danh sách câu trả lời ngẫu nhiên
 RANDOM_REPLIES = [
     "Dạ sếp, em có thể giúp gì ạ? 😊",
