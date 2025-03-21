@@ -219,7 +219,6 @@ def run_schedule_and_bot():
 # Tạo một thread cho schedule
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
-import telebot
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
