@@ -219,6 +219,12 @@ def run_schedule_and_bot():
 # Tạo một thread cho schedule
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
+def send_long_message(chat_id, text):
+    """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
+    max_length = 4096  # Telegram giới hạn tin nhắn
+    for i in range(0, len(text), max_length):
+        bot.send_message(chat_id, text[i:i+max_length])
+
 
 def find_bible_verses(book, chapter, verses):
     with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
@@ -265,6 +271,11 @@ def find_bible_verses(book, chapter, verses):
                 results[-1] += " " + line  # Nối thêm nội dung câu dài
 
     return "\n".join(results) if results else "Không tìm thấy câu Kinh Thánh nào."
+def send_long_message(chat_id, text):
+    """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
+    max_length = 4096  # Telegram giới hạn tin nhắn
+    for i in range(0, len(text), max_length):
+        bot.send_message(chat_id, text[i:i+max_length])
 
 # Lệnh tìm nhiều câu Kinh Thánh trong Telegram Bot
 @bot.message_handler(commands=['bible'])
@@ -282,7 +293,10 @@ def get_bible_verses(message):
         chapter = int(chapter)
 
         verse_texts = find_bible_verses(book, chapter, verses)
-        bot.reply_to(message, f"📖 {verse_texts}")
+
+        # Gửi tin nhắn bằng cách chia nhỏ nội dung
+        send_long_message(message.chat.id, f"📖 {verse_texts}")
+
     except Exception as e:
         bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 # Chạy bot polling
