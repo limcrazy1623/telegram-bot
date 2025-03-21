@@ -6,7 +6,11 @@ from datetime import datetime
 import schedule
 import time
 import threading  # Thêm thư viện threading
+<<<<<<< HEAD
 import pytz
+=======
+
+>>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
 
 TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
 bot = telebot.TeleBot(TOKEN)
@@ -15,6 +19,10 @@ bot = telebot.TeleBot(TOKEN)
 APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHVTygxz9HgTgpq8KfHO2bcsE9j3IoV3mk1kFBwbl35qmRTLKvi7nEvrXrj09nzsGUsA/exec"
 
 print("Bot đang chạy...")
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
 # Xử lý lệnh /start và /help
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -31,6 +39,7 @@ def send_report(message):
         bot.send_message(chat_id, f"📢 Báo cáo: {response.text}")
     except Exception as e:
         bot.send_message(chat_id, f"❌ Lỗi: {str(e)}")
+<<<<<<< HEAD
 # Danh sách bài học
 lessons = {
     "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
@@ -75,6 +84,8 @@ def send_daily_lesson():
 
 # Đặt lịch gửi thông báo hàng ngày vào lúc 5h00 sáng
 schedule.every().day.at("05:00").do(send_daily_lesson)
+=======
+>>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
 
 # Danh sách câu Kinh Thánh động viên
 BIBLE_VERSES = [
@@ -135,5 +146,91 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
 
+<<<<<<< HEAD
 # Chạy bot
+=======
+
+# Danh sách bài học Kinh Thánh theo ngày
+lessons = {
+    "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
+    "21-3-2025": "Theo Chúa Sẽ Được Chỉ?",
+    "22-3-2025": "Lòng Thương Xót Của Chúa",
+    "23-3-2025": "Trở Nên Khôn Ngoan",
+    "24-3-2025": "Nguồn cậy Trông Của Tôi",
+    "25-3-2025": "Chúa Chẳng Bao Giờ Từ Bỏ",
+    "26-3-2025": "Thực Hành Lời Chúa",
+    "27-3-2025": "Làm Thầy",
+    "28-3-2025": "Quyền Của Lưỡi",
+    "29-3-2025": "Công Dân Sống Đẹp Lòng Chúa",
+    "30-3-2025": "Tiếp Nhận và Thực Hành Sự Khôn Ngoan",
+    "31-3-2025": "Nhận Biệt Để Sống Xứng Đáng"
+}
+
+# Xử lý lệnh /start và /help
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.reply_to(message, "Chào sếp! Nhập /baocao để nhận báo cáo hoặc /homnay để nhận bài học hôm nay.")
+
+# Xử lý lệnh /homnay để gửi bài học hôm nay
+@bot.message_handler(commands=['homnay'])
+def send_today_lesson(message):
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+    bot.reply_to(message, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({today}) là: {lesson}")
+
+# Xử lý lệnh /baihoc theo ngày nhập từ người dùng
+@bot.message_handler(commands=['baihoc'])
+def send_lesson_by_date(message):
+    try:
+        date_requested = message.text.strip().split(' ')[1]
+    except IndexError:
+        bot.reply_to(message, "Vui lòng nhập ngày theo định dạng: /baihoc dd-mm-yyyy")
+        return
+    
+    lesson = lessons.get(date_requested, "Không có bài học cho ngày này.")
+    bot.reply_to(message, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({date_requested}) là: {lesson}")
+
+# Hàm gửi bài học tự động hàng ngày
+def send_daily_lesson():
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+    # Thay đổi ID người nhận (chat_id) thành ID của bạn hoặc nhóm bạn muốn gửi
+    chat_id = '6416693025'
+    bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({today}) là: {lesson}")
+
+# Đặt lịch gửi thông báo hàng ngày vào lúc 5h00 sáng
+schedule.every().day.at("05:00").do(send_daily_lesson)
+
+# Hàm chạy đồng thời schedule và bot.polling
+def run_schedule_and_bot():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+# Tạo một thread cho schedule
+schedule_thread = threading.Thread(target=run_schedule_and_bot)
+schedule_thread.start()
+
+# Hàm gửi bài học Kinh Thánh hằng ngày vào lúc 5h00 sáng
+def send_daily_lesson():
+    today = datetime.today().strftime('%d-%m-%Y')
+    lesson = lessons.get(today, "Hôm nay không có bài học.")
+    chat_id = "6416693025"  # Thay chat_id của bạn
+    bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học hôm nay ({today}) là: {lesson}")
+
+# Đặt lịch gửi thông báo hàng ngày vào lúc 5h30 sáng
+schedule.every().day.at("05:00").do(send_daily_lesson)
+
+# Hàm chạy đồng thời schedule và bot.polling
+def run_schedule_and_bot():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+# Tạo một thread cho schedule
+schedule_thread = threading.Thread(target=run_schedule_and_bot)
+schedule_thread.start()
+
+# Chạy bot polling
+>>>>>>> 6fa36ca (Updated bot3.py, removed credentials.json, and modified requirements.txt)
 bot.polling(none_stop=True, interval=0)
