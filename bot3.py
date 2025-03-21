@@ -221,19 +221,7 @@ schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
 import time
 
-def send_long_message(chat_id, text):
-    """ Chia nhỏ tin nhắn dài để tránh lỗi 414 & 429 trên Telegram """
-    max_length = 4096  # Telegram giới hạn tin nhắn
-    for i in range(0, len(text), max_length):
-        try:
-            bot.send_message(chat_id, text[i:i+max_length])
-            time.sleep(1.5)  # Chờ 1.5 giây giữa mỗi tin nhắn để tránh lỗi 429
-        except Exception as e:
-            print(f"❌ Lỗi khi gửi tin nhắn: {e}")
-            time.sleep(5)  # Nếu lỗi xảy ra, chờ 5 giây trước khi thử lại
-
-
-def find_bible_verses(book, chapter, verses):
+def find_bible_verses(book, chapter, verses, max_verses=5):  # Giới hạn số câu tối đa
     with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
@@ -242,7 +230,7 @@ def find_bible_verses(book, chapter, verses):
     results = []
     current_verse = None
 
-    # Xử lý nếu nhập đoạn (vd: "1-3") hoặc nhiều câu riêng lẻ (vd: "16,18,20")
+    # Xử lý danh sách câu (1-3 hoặc 2,5)
     verse_ranges = []
     for part in verses.split(","):
         if "-" in part:
@@ -272,12 +260,17 @@ def find_bible_verses(book, chapter, verses):
                 if verse_num in verse_ranges:
                     current_verse = verse_num
                     results.append(f"{book} {chapter}:{verse_num} {parts[1]}")
+
+                    # 🔥 Nếu đã lấy đủ số câu yêu cầu, dừng ngay
+                    if len(results) >= max_verses:
+                        break
                     continue
 
             if current_verse and not line[0].isdigit():
-                results[-1] += " " + line  # Nối thêm nội dung câu dài
+                results[-1] += " " + line  # Gộp câu dài
 
     return "\n".join(results) if results else "Không tìm thấy câu Kinh Thánh nào."
+
 def send_long_message(chat_id, text):
     """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
     max_length = 4096  # Telegram giới hạn tin nhắn
@@ -292,16 +285,16 @@ def get_bible_verses(message):
         parts = query.split(" ")
 
         if len(parts) < 2 or ":" not in parts[1]:
-            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu hoặc /bible Sách Chương:Câu1-Câu2\nVí dụ:\n/bible Thi-thiên 23:1-3\n/bible Giăng 3:16,18")
+            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu hoặc /bible Sách Chương:Câu1-Câu2\nVí dụ:\n/bible Thi-thiên 23:1-5\n/bible Giăng 3:16,18,20")
             return
 
         book = parts[0]
         chapter, verses = parts[1].split(":")
         chapter = int(chapter)
 
-        verse_texts = find_bible_verses(book, chapter, verses)
+        # 🔥 Giới hạn số câu trả về tối đa là 5
+        verse_texts = find_bible_verses(book, chapter, verses, max_verses=5)
 
-        # Gửi tin nhắn bằng cách chia nhỏ nội dung
         send_long_message(message.chat.id, f"📖 {verse_texts}")
 
     except Exception as e:
