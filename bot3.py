@@ -221,7 +221,7 @@ schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
 import time
 
-def find_bible_verses(book, chapter, verses, max_verses=5):  # Giới hạn số câu tối đa
+def find_bible_verses(book, chapter, verses, max_verses=2):  # Giới hạn số câu tối đa
     with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
