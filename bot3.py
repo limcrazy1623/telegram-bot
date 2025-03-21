@@ -219,11 +219,18 @@ def run_schedule_and_bot():
 # Tạo một thread cho schedule
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
+import time
+
 def send_long_message(chat_id, text):
-    """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
+    """ Chia nhỏ tin nhắn dài để tránh lỗi 414 & 429 trên Telegram """
     max_length = 4096  # Telegram giới hạn tin nhắn
     for i in range(0, len(text), max_length):
-        bot.send_message(chat_id, text[i:i+max_length])
+        try:
+            bot.send_message(chat_id, text[i:i+max_length])
+            time.sleep(1.5)  # Chờ 1.5 giây giữa mỗi tin nhắn để tránh lỗi 429
+        except Exception as e:
+            print(f"❌ Lỗi khi gửi tin nhắn: {e}")
+            time.sleep(5)  # Nếu lỗi xảy ra, chờ 5 giây trước khi thử lại
 
 
 def find_bible_verses(book, chapter, verses):
@@ -311,4 +318,9 @@ def send_welcome(message):
     bot.reply_to(message, "Hello!")
 
 # Chạy polling với drop_pending_updates để tránh lỗi 409
-bot.polling(none_stop=True, interval=0, timeout=20, drop_pending_updates=True)
+while True:
+    try:
+        bot.polling(none_stop=True, interval=3, timeout=30)
+    except Exception as e:
+        print(f"❌ Lỗi: {e}. Bot sẽ thử lại sau...")
+        time.sleep(10)  # Chờ 10 giây trước khi thử lại
