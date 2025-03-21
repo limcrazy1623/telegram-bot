@@ -208,6 +208,7 @@ def send_daily_lesson():
 
 # Đặt lịch gửi thông báo hàng ngày vào lúc 5h30 sáng
 schedule.every().day.at("05:00").do(send_daily_lesson)
+
 def find_bible_verse(book, chapter, verse):
     BIBLE_FILE = "kinh_thanh_updated.txt"
     current_book = None
@@ -238,8 +239,6 @@ def find_bible_verse(book, chapter, verse):
 
     return found_verse if found_verse else "📖 Xin lỗi, tôi không tìm thấy câu này."
 
-# Ví dụ gọi hàm:
-print(find_bible_verse("Sáng-thế Ký", 1, 1))
 
 # Hàm chạy đồng thời schedule và bot.polling
 def run_schedule_and_bot():
