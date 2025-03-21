@@ -208,6 +208,30 @@ def send_daily_lesson():
 
 # Đặt lịch gửi thông báo hàng ngày vào lúc 5h30 sáng
 schedule.every().day.at("05:00").do(send_daily_lesson)
+BIBLE_FILE = os.path.join(os.getcwd(), "kinh_thanh_updated.txt")  # Thay đổi tên file
+
+# Kiểm tra file có tồn tại không
+if not os.path.exists(BIBLE_FILE):
+    print("❌ Không tìm thấy file kinh_thanh_updated.txt!")
+
+# Hàm tìm câu Kinh Thánh trong file
+def find_bible_verse(query):
+    query = query.strip()
+    with open(BIBLE_FILE, "r", encoding="utf-8") as file:
+        for line in file:
+            if line.startswith(query):
+                return line.strip()
+    return "Xin lỗi, tôi không tìm thấy câu này."
+
+# Lệnh tìm câu Kinh Thánh
+@bot.message_handler(commands=['bible'])
+def get_bible_verse(message):
+    try:
+        query = message.text.replace('/bible ', '').strip()
+        verse = find_bible_verse(query)
+        bot.reply_to(message, f"📖 {verse}")
+    except Exception as e:
+        bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 
 # Hàm chạy đồng thời schedule và bot.polling
 def run_schedule_and_bot():
