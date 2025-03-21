@@ -208,13 +208,6 @@ def send_daily_lesson():
 
 # Đặt lịch gửi thông báo hàng ngày vào lúc 5h30 sáng
 schedule.every().day.at("05:00").do(send_daily_lesson)
-BIBLE_FILE = os.path.join(os.getcwd(), "kinh_thanh_updated.txt")  # Thay đổi tên file
-
-# Kiểm tra file có tồn tại không
-if not os.path.exists(BIBLE_FILE):
-    print("❌ Không tìm thấy file kinh_thanh_updated.txt!")
-
-# Hàm tìm câu Kinh Thánh trong file
 def find_bible_verse(book, chapter, verse):
     BIBLE_FILE = "kinh_thanh_updated.txt"
     current_book = None
