@@ -220,68 +220,69 @@ def run_schedule_and_bot():
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
 
-def find_bible_verse(book, chapter, verse):
+def find_bible_verses(book, chapter, verses):
     with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     found_book = False
     found_chapter = False
-    found_verse = False
-    verse_text = ""
+    results = []
+    current_verse = None
+
+    # Xử lý nếu nhập đoạn (vd: "1-3") hoặc nhiều câu riêng lẻ (vd: "16,18,20")
+    verse_ranges = []
+    for part in verses.split(","):
+        if "-" in part:
+            start, end = map(int, part.split("-"))
+            verse_ranges.extend(range(start, end + 1))
+        else:
+            verse_ranges.append(int(part))
 
     for line in lines:
         line = line.strip()
-
-        if not line:  # Nếu dòng trống, bỏ qua
+        if not line:
             continue
 
-        # Tìm sách
         if line.lower() == book.lower():
             found_book = True
             found_chapter = False
             continue
 
-        # Tìm chương
         if found_book and line.lower() == f"chương {chapter}".lower():
             found_chapter = True
             continue
 
-        # Tìm câu
         if found_chapter:
-            parts = line.split(" ", 1)  # Tách số câu và nội dung
-            if len(parts) > 1 and parts[0].isdigit() and int(parts[0]) == verse:
-                found_verse = True
-                verse_text = parts[1]
-                continue
+            parts = line.split(" ", 1)
+            if len(parts) > 1 and parts[0].isdigit():
+                verse_num = int(parts[0])
+                if verse_num in verse_ranges:
+                    current_verse = verse_num
+                    results.append(f"{book} {chapter}:{verse_num} {parts[1]}")
+                    continue
 
-            # Nếu đã tìm thấy câu, tiếp tục nối các dòng tiếp theo
-            if found_verse:
-                if line[0].isdigit():  # Nếu dòng mới bắt đầu bằng số, tức là câu mới -> dừng lại
-                    break
-                verse_text += " " + line  # Nối thêm nội dung
+            if current_verse and not line[0].isdigit():
+                results[-1] += " " + line  # Nối thêm nội dung câu dài
 
-    return f"{book} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
-# Lệnh /start
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.reply_to(message, "Hello! Nhập /bible Sách Chương:Câu để tra cứu Kinh Thánh.")
+    return "\n".join(results) if results else "Không tìm thấy câu Kinh Thánh nào."
 
-# Lệnh /bible để tra cứu Kinh Thánh
+# Lệnh tìm nhiều câu Kinh Thánh trong Telegram Bot
 @bot.message_handler(commands=['bible'])
-def get_bible_verse(message):
+def get_bible_verses(message):
     try:
         query = message.text.replace('/bible ', '').strip()
         parts = query.split(" ")
 
         if len(parts) < 2 or ":" not in parts[1]:
-            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu\nVí dụ: /bible Thi-thiên 23:1")
+            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu hoặc /bible Sách Chương:Câu1-Câu2\nVí dụ:\n/bible Thi-thiên 23:1-3\n/bible Giăng 3:16,18")
             return
 
         book = parts[0]
-        chapter, verse = map(int, parts[1].split(":"))
-        verse_text = find_bible_verse(book, chapter, verse)
+        chapter, verses = parts[1].split(":")
+        chapter = int(chapter)
 
-        bot.reply_to(message, f"📖 {verse_text}")
+        verse_texts = find_bible_verses(book, chapter, verses)
+        bot.reply_to(message, f"📖 {verse_texts}")
     except Exception as e:
         bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 # Chạy bot polling
