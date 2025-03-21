@@ -15,7 +15,22 @@ bot = telebot.TeleBot(TOKEN)
 APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHVTygxz9HgTgpq8KfHO2bcsE9j3IoV3mk1kFBwbl35qmRTLKvi7nEvrXrj09nzsGUsA/exec"
 
 print("Bot đang chạy...")
+# Xử lý lệnh /start và /help
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.reply_to(message, "Chào sếp! Nhập /baocao để nhận báo cáo.")
 
+# Xử lý lệnh /baocao để lấy báo cáo từ Google Sheets
+@bot.message_handler(commands=['baocao'])
+def send_report(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "📊 Đang tạo báo cáo, vui lòng chờ...")
+
+    try:
+        response = requests.get(APP_SCRIPT_URL)
+        bot.send_message(chat_id, f"📢 Báo cáo: {response.text}")
+    except Exception as e:
+        bot.send_message(chat_id, f"❌ Lỗi: {str(e)}")
 # Danh sách bài học
 lessons = {
     "20-3-2025": "Người Giàu Vào Nước Thiên Đàng?",
@@ -73,6 +88,30 @@ BIBLE_VERSES = [
     "Hãy trông cậy Đức Giê-hô-va hết lòng, chớ nương cậy nơi sự thông sáng của con. – Châm Ngôn 3:5",
     "Kẻ nào làm việc chăm chỉ sẽ được cai trị, còn ai lười biếng sẽ bị phục dịch. – Châm Ngôn 12:24",
     "Hãy đứng vững, chớ rúng động, hãy làm công việc Chúa cách dư dật luôn, vì biết rằng công khó của anh em trong Chúa chẳng phải là vô ích. – 1 Cô-rinh-tô 15:58"
+]
+
+# Biến lưu trạng thái xem tin nhắn trước có phải "câu kinh thánh" không
+last_message_was_bible_request = {}
+
+@bot.message_handler(func=lambda message: message.text.lower() == "câu kinh thánh")
+def send_bible_verse_first(message):
+    global last_message_was_bible_request
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Ok Sếp, tôi sẽ khích lệ Sếp bằng một câu Kinh Thánh")
+    bot.send_message(chat_id, random.choice(BIBLE_VERSES))
+    last_message_was_bible_request[chat_id] = True  # Đánh dấu tin nhắn trước là yêu cầu câu Kinh Thánh
+
+@bot.message_handler(func=lambda message: message.text.lower() == "câu nữa")
+def send_bible_verse_again(message):
+    global last_message_was_bible_request
+    chat_id = message.chat.id
+    if last_message_was_bible_request.get(chat_id, False):  # Kiểm tra xem tin nhắn trước có phải là "câu kinh thánh" không
+        bot.send_message(chat_id, "Vâng!")
+        bot.send_message(chat_id, random.choice(BIBLE_VERSES))
+    else:
+        bot.send_message(chat_id, "Sếp muốn một câu Kinh Thánh à? Hãy nói 'câu kinh thánh' trước nhé!")
+    last_message_was_bible_request[chat_id] = True  # Đánh dấu tin nhắn này là yêu cầu câu Kinh Thánh
+
 ]
 
 # Danh sách câu trả lời ngẫu nhiên
