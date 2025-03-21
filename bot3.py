@@ -222,3 +222,14 @@ schedule_thread.start()
 
 # Chạy bot polling
 bot.polling(none_stop=True, interval=0)
+import telebot
+
+TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "Hello!")
+
+# Chạy polling với drop_pending_updates để tránh lỗi 409
+bot.polling(none_stop=True, interval=0, timeout=20, drop_pending_updates=True)
