@@ -219,7 +219,64 @@ def run_schedule_and_bot():
 # Tạo một thread cho schedule
 schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
+import telebot
 
+TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
+bot = telebot.TeleBot(TOKEN)
+
+# Hàm tìm câu Kinh Thánh
+def find_bible_verse(book, chapter, verse):
+    with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    found_book = False
+    found_chapter = False
+
+    for line in lines:
+        line = line.strip()
+        
+        if not line:  # Nếu dòng trống, bỏ qua
+            continue
+
+        if line.lower().startswith(book.lower()):  # Tìm đúng tên sách
+            found_book = True
+            found_chapter = False  # Reset chương nếu tìm thấy sách mới
+            continue
+
+        if found_book and line.startswith(f"Chương {chapter}"):  # Tìm đúng chương
+            found_chapter = True
+            continue
+
+        if found_chapter:
+            parts = line.split(" ", 1)  # Tách câu thành số câu và nội dung
+            if len(parts) > 1 and parts[0].isdigit() and int(parts[0]) == verse:
+                return line
+
+    return "Không tìm thấy câu Kinh Thánh này."
+
+# Lệnh /start
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "Hello! Nhập /bible Sách Chương:Câu để tra cứu Kinh Thánh.")
+
+# Lệnh /bible để tra cứu Kinh Thánh
+@bot.message_handler(commands=['bible'])
+def get_bible_verse(message):
+    try:
+        query = message.text.replace('/bible ', '').strip()
+        parts = query.split(" ")
+
+        if len(parts) < 2 or ":" not in parts[1]:
+            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu\nVí dụ: /bible Thi-thiên 23:1")
+            return
+
+        book = parts[0]
+        chapter, verse = map(int, parts[1].split(":"))
+        verse_text = find_bible_verse(book, chapter, verse)
+
+        bot.reply_to(message, f"📖 {verse_text}")
+    except Exception as e:
+        bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 # Chạy bot polling
 bot.polling(none_stop=True, interval=0)
 import telebot
