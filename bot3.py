@@ -221,55 +221,47 @@ schedule_thread = threading.Thread(target=run_schedule_and_bot)
 schedule_thread.start()
 import time
 
-def find_bible_verses(book, chapter, verses, max_verses=2):  # Giới hạn số câu tối đa
+def find_bible_verse(book, chapter, verse):
     with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     found_book = False
     found_chapter = False
-    results = []
-    current_verse = None
-
-    # Xử lý danh sách câu (1-3 hoặc 2,5)
-    verse_ranges = []
-    for part in verses.split(","):
-        if "-" in part:
-            start, end = map(int, part.split("-"))
-            verse_ranges.extend(range(start, end + 1))
-        else:
-            verse_ranges.append(int(part))
+    found_verse = False
+    verse_text = ""
 
     for line in lines:
         line = line.strip()
-        if not line:
+
+        if not line:  # Nếu dòng trống, bỏ qua
             continue
 
+        # Tìm sách
         if line.lower() == book.lower():
             found_book = True
             found_chapter = False
             continue
 
+        # Tìm chương
         if found_book and line.lower() == f"chương {chapter}".lower():
             found_chapter = True
             continue
 
+        # Tìm câu
         if found_chapter:
-            parts = line.split(" ", 1)
-            if len(parts) > 1 and parts[0].isdigit():
-                verse_num = int(parts[0])
-                if verse_num in verse_ranges:
-                    current_verse = verse_num
-                    results.append(f"{book} {chapter}:{verse_num} {parts[1]}")
+            parts = line.split(" ", 1)  # Tách số câu và nội dung
+            if len(parts) > 1 and parts[0].isdigit() and int(parts[0]) == verse:
+                found_verse = True
+                verse_text = parts[1]
+                continue
 
-                    # 🔥 Nếu đã lấy đủ số câu yêu cầu, dừng ngay
-                    if len(results) >= max_verses:
-                        break
-                    continue
+            # Nếu đã tìm thấy câu, tiếp tục nối các dòng tiếp theo
+            if found_verse:
+                if line[0].isdigit():  # Nếu dòng mới bắt đầu bằng số, tức là câu mới -> dừng lại
+                    break
+                verse_text += " " + line  # Nối thêm nội dung
 
-            if current_verse and not line[0].isdigit():
-                results[-1] += " " + line  # Gộp câu dài
-
-    return "\n".join(results) if results else "Không tìm thấy câu Kinh Thánh nào."
+    return f"{book} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
 
 def send_long_message(chat_id, text):
     """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
@@ -277,26 +269,22 @@ def send_long_message(chat_id, text):
     for i in range(0, len(text), max_length):
         bot.send_message(chat_id, text[i:i+max_length])
 
-# Lệnh tìm nhiều câu Kinh Thánh trong Telegram Bot
+# Lệnh tìm câu Kinh Thánh trong Telegram Bot
 @bot.message_handler(commands=['bible'])
-def get_bible_verses(message):
+def get_bible_verse(message):
     try:
         query = message.text.replace('/bible ', '').strip()
         parts = query.split(" ")
 
         if len(parts) < 2 or ":" not in parts[1]:
-            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu hoặc /bible Sách Chương:Câu1-Câu2\nVí dụ:\n/bible Thi-thiên 23:1-5\n/bible Giăng 3:16,18,20")
+            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu\nVí dụ: /bible Thi-thiên 23:1")
             return
 
         book = parts[0]
-        chapter, verses = parts[1].split(":")
-        chapter = int(chapter)
+        chapter, verse = map(int, parts[1].split(":"))
+        verse_text = find_bible_verse(book, chapter, verse)
 
-        # 🔥 Giới hạn số câu trả về tối đa là 5
-        verse_texts = find_bible_verses(book, chapter, verses, max_verses=2)
-
-        send_long_message(message.chat.id, f"📖 {verse_texts}")
-
+        bot.reply_to(message, f"📖 {verse_text}")
     except Exception as e:
         bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 # Chạy bot polling
