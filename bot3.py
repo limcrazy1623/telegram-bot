@@ -55,22 +55,13 @@ FACEBOOK_LINK = "https://www.facebook.com/BaiHocKinhThanhHangNgay/?locale=vi_VN"
 
 @bot.message_handler(commands=['homnay'])
 def send_today_lesson(message):
-    today = datetime.today().strftime('%d-%m-%Y')
+    today = datetime.today().strftime('%-d-%-m-%Y')  # Kiểm tra lại định dạng
+    print("Hôm nay là:", today)  # Debug để kiểm tra ngày
+    
     lesson = lessons.get(today, "Hôm nay không có bài học.")
     response = f"📖 *Bài học Kinh Thánh hôm nay ({today}):*\n➡️ {lesson}\n\n🔗 Xem chi tiết tại: [Facebook]({FACEBOOK_LINK})"
-    bot.reply_to(message, response, parse_mode="Markdown")
-
-# Xử lý lệnh /baihoc theo ngày nhập từ người dùng
-@bot.message_handler(commands=['baihoc'])
-def send_lesson_by_date(message):
-    try:
-        date_requested = message.text.strip().split(' ')[1]
-    except IndexError:
-        bot.reply_to(message, "Vui lòng nhập ngày theo định dạng: /baihoc d-m-yyyy")
-        return
     
-    lesson = lessons.get(date_requested, "Không có bài học cho ngày này.")
-    bot.reply_to(message, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({date_requested}) là: {lesson}")
+    bot.reply_to(message, response, parse_mode="Markdown")
 
 # Hàm gửi bài học tự động hàng ngày
 def send_daily_lesson():
