@@ -63,6 +63,16 @@ def send_today_lesson(message):
     
     bot.reply_to(message, response, parse_mode="Markdown")
 
+@bot.message_handler(func=lambda message: message.text.strip().count('-') == 2)
+def send_lesson_by_text(message):
+    date_requested = message.text.strip()
+    
+    lesson = lessons.get(date_requested, "Không có bài học cho ngày này.")
+    response = f"📖 Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày hôm nay ({date_requested}):\n➡️ {lesson}"
+    
+    bot.reply_to(message, response)
+
+
 # Hàm gửi bài học tự động hàng ngày
 def send_daily_lesson():
     today = datetime.now().strftime('%-d-%-m-%Y')  # Định dạng ngày đúng với danh sách lessons
