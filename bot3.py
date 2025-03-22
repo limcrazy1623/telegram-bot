@@ -59,7 +59,7 @@ def send_today_lesson(message):
     print("Hôm nay là:", today)  # Debug để kiểm tra ngày
     
     lesson = lessons.get(today, "Hôm nay không có bài học.")
-    response = f"📖 *Bài học Kinh Thánh hôm nay ({today}):*\n➡️ {lesson}\n\n🔗 Xem chi tiết tại: [Facebook]({FACEBOOK_LINK})"
+    response = f"📖 *Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày hôm nay ({today}):*\n➡️ {lesson}\n\n🔗 Xem chi tiết tại: [Facebook]({FACEBOOK_LINK})"
     
     bot.reply_to(message, response, parse_mode="Markdown")
 
