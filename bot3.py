@@ -81,7 +81,7 @@ def send_daily_lesson():
     bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({today}) là: {lesson}")
 
 # Đặt lịch gửi thông báo hàng ngày vào lúc 5h00 sáng
-schedule.every().day.at("05:00").do(send_daily_lesson)
+schedule.every().day.at("22:00").do(send_daily_lesson)
 # Danh sách câu Kinh Thánh động viên
 BIBLE_VERSES = [
     "Ta làm được mọi sự nhờ Đấng ban thêm sức cho ta. – Phi-líp 4:13",
@@ -140,18 +140,6 @@ THANKS_MESSAGES = ["cảm ơn", "thanks", "tks", "thank you", "ok", "oke"]
 @bot.message_handler(func=lambda message: message.text.lower() in THANKS_MESSAGES)
 def thanks_reply(message):
     bot.reply_to(message, "Không có chi, đó là nhiệm vụ của em. Chúc Sếp làm việc vui vẻ! 😃")
-
-
-# Hàm gửi bài học tự động hàng ngày
-def send_daily_lesson():
-    today = datetime.today().strftime('%d-%m-%Y')
-    lesson = lessons.get(today, "Hôm nay không có bài học.")
-    # Thay đổi ID người nhận (chat_id) thành ID của bạn hoặc nhóm bạn muốn gửi
-    chat_id = '6416693025'
-    bot.send_message(chat_id, f"Vâng! Thưa Sếp, bài học Kinh Thánh Hằng Ngày ({today}) là: {lesson}")
-
-# Đặt lịch gửi thông báo hàng ngày vào lúc 5h00 sáng
-schedule.every().day.at("05:00").do(send_daily_lesson)
 
 # Hàm chạy đồng thời schedule và bot.polling
 def run_schedule_and_bot():
