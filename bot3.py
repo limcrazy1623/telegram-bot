@@ -214,22 +214,28 @@ def send_long_message(chat_id, text):
     for i in range(0, len(text), max_length):
         bot.send_message(chat_id, text[i:i+max_length])
 
-# Lệnh tìm câu Kinh Thánh trong Telegram Bot
-@bot.message_handler(commands=['bible'])
-def get_bible_verse(message):
+import re  # Import thư viện để xử lý định dạng câu Kinh Thánh
+
+@bot.message_handler(func=lambda message: True)  # Xử lý tất cả tin nhắn
+def auto_detect_bible_verse(message):
     try:
-        query = message.text.replace('/bible ', '').strip()
-        parts = query.split(" ")
+        query = message.text.strip()
 
-        if len(parts) < 2 or ":" not in parts[1]:
-            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu\nVí dụ: /bible Thi-thiên 23:1")
-            return
+        # 🔍 Kiểm tra định dạng "Sách Chương:Câu" bằng Regex
+        match = re.match(r"([\wÀ-Ỹà-ỹ-]+) (\d+):(\d+)", query)
+        if not match:
+            return  # Nếu tin nhắn không phải câu Kinh Thánh, bỏ qua
 
-        book = parts[0]
-        chapter, verse = map(int, parts[1].split(":"))
-        verse_text = find_bible_verse(book, chapter, verse)
+        book, chapter, verse = match.groups()
+        chapter = int(chapter)
+        verse = str(verse)  # Chuyển số câu về dạng chuỗi
 
-        bot.reply_to(message, f"📖 {verse_text}")
+        # 🔥 Tìm câu Kinh Thánh trong file
+        verse_text = find_bible_verses(book, chapter, verse, max_verses=1)
+
+        # 🔹 Gửi kết quả
+        send_long_message(message.chat.id, f"📖 {verse_text}")
+
     except Exception as e:
         bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 # Chạy bot polling
