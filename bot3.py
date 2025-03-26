@@ -138,6 +138,9 @@ def get_bible_verse(message):
     except Exception as e:
         bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 
+import requests
+import json
+
 def doanh_thu_thang(update, context):
     chat_id = update.message.chat_id
     text = update.message.text.lower()
@@ -150,25 +153,31 @@ def doanh_thu_thang(update, context):
         url = f"{APP_SCRIPT_URL}?action=doanhthu&month={month}"
         response = requests.get(url)
 
-        # Kiểm tra API có phản hồi không
+        # Debug: In ra nội dung API trả về
+        print(f"🔹 API Response: {response.text}")
+
+        # Kiểm tra phản hồi từ API
         if response.status_code == 200 and response.text.strip():
             try:
+                # Kiểm tra xem API có trả về JSON không
                 data = json.loads(response.text)  # Parse JSON từ API
+
+                # Tạo tin nhắn phản hồi
                 message = (f"📊 Doanh thu tháng {month}:\n"
                            f"💰 Tổng tiền: {data['tong_tien']:,.0f} VND\n"
                            f"🖨️ Tiền in: {data['tien_in']:,.0f} VND\n"
                            f"💵 Tiền lời: {data['tien_loi']:,.0f} VND")
             except json.JSONDecodeError:
-                message = "❌ Lỗi: API trả về dữ liệu không hợp lệ."
+                message = f"❌ API trả về lỗi: {response.text}"
         else:
-            message = "❌ Lỗi: Không nhận được phản hồi từ API."
+            message = "❌ Lỗi: Không nhận được phản hồi hợp lệ từ API."
 
     except (IndexError, ValueError):
         message = "❌ Lỗi: Vui lòng nhập đúng định dạng 'doanh thu tháng X'."
     except Exception as e:
         message = f"❌ Lỗi không xác định: {str(e)}"
 
-    bot.send_message(chat_id, message)
+    context.bot.send_message(chat_id, message)
 
 
 # Chạy đồng thời bot và schedule
