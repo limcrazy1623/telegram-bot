@@ -168,7 +168,7 @@ schedule_thread.start()
 import time
 
 def find_bible_verse(book, chapter, verse):
-    with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
+    with open("/mnt/data/kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     found_book = False
@@ -176,24 +176,26 @@ def find_bible_verse(book, chapter, verse):
     found_verse = False
     verse_text = ""
 
+    book = book.strip().lower()  # Xoá khoảng trắng & chuyển chữ thường
+
     for line in lines:
         line = line.strip()
 
-        if not line:  # Nếu dòng trống, bỏ qua
+        if not line:  # Bỏ qua dòng trống
             continue
 
-        # Tìm sách
-        if line.lower() == book.lower():
+        # 🔹 Tìm sách Kinh Thánh
+        if line.lower() == book:
             found_book = True
             found_chapter = False
             continue
 
-        # Tìm chương
+        # 🔹 Tìm chương
         if found_book and line.lower() == f"chương {chapter}".lower():
             found_chapter = True
             continue
 
-        # Tìm câu
+        # 🔹 Tìm câu Kinh Thánh
         if found_chapter:
             parts = line.split(" ", 1)  # Tách số câu và nội dung
             if len(parts) > 1 and parts[0].isdigit() and int(parts[0]) == verse:
@@ -201,13 +203,13 @@ def find_bible_verse(book, chapter, verse):
                 verse_text = parts[1]
                 continue
 
-            # Nếu đã tìm thấy câu, tiếp tục nối các dòng tiếp theo
+            # Nếu đã tìm thấy câu, tiếp tục nối nội dung của câu dài
             if found_verse:
-                if line[0].isdigit():  # Nếu dòng mới bắt đầu bằng số, tức là câu mới -> dừng lại
+                if line[0].isdigit():  # Nếu dòng tiếp theo là số, đó là câu mới -> dừng lại
                     break
                 verse_text += " " + line  # Nối thêm nội dung
 
-    return f"{book} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
+    return f"{book.title()} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
 
 def send_long_message(chat_id, text):
     """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
