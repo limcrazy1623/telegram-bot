@@ -250,4 +250,4 @@ while True:
     except Exception as e:
         print(f"❌ Lỗi: {e}. Bot sẽ thử lại sau...")
         time.sleep(10)  # Chờ 10 giây trước khi thử lại
-send_daily_lesson()  # Gọi hàm ngay để kiểm tra nội dung
+
