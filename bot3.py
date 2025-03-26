@@ -147,25 +147,33 @@ bot = telebot.TeleBot(TOKEN)
 APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHVTygxz9HgTgpq8KfHO2bcsE9j3IoV3mk1kFBwbl35qmRTLKvi7nEvrXrj09nzsGUsA/exec"
 
 @bot.message_handler(regexp=r"doanh thu tháng (\d+)")
-def get_revenue(message):
-    chat_id = message.chat.id
-    match = re.search(r"(\d+)", message.text)
-    if match:
-        month = match.group(1)
-        bot.send_message(chat_id, f"📊 Đang tính toán doanh thu tháng {month}...")
-        
-        try:
-            response = requests.get(f"{APP_SCRIPT_URL}?month={month}")
-            data = response.json()
-            reply = (f"Vâng! Thưa Sếp\n"
-                     f"📅 Doanh thu tháng {month}:\n"
-                     f"💰 Tổng tiền: {data['tong_tien']}\n"
-                     f"🖨️ Tiền in: {data['tien_in']}\n"
-                     f"💵 Tiền lời: {data['tien_loi']}")
-            bot.send_message(chat_id, reply)
-        except Exception as e:
-            bot.send_message(chat_id, f"❌ Lỗi: {str(e)}")
+def doanh_thu_thang(update, context):
+    chat_id = update.message.chat_id
+    text = update.message.text.lower()
 
+    try:
+        month = int(text.split("tháng")[1].strip())
+        url = f"{APP_SCRIPT_URL}?action=doanhthu&month={month}"
+        response = requests.get(url)
+
+        print(f"🔹 API Response: {response.text}")  # Debug API trả về gì
+
+        if response.status_code == 200 and response.text.strip():
+            try:
+                data = json.loads(response.text)  # Parse JSON
+                message = (f"📊 Doanh thu tháng {month}:\n"
+                           f"💰 Tổng tiền: {data['tong_tien']:,.0f} VND\n"
+                           f"🖨️ Tiền in: {data['tien_in']:,.0f} VND\n"
+                           f"💵 Tiền lời: {data['tien_loi']:,.0f} VND")
+            except json.JSONDecodeError:
+                message = f"❌ API trả về lỗi: {response.text}"
+        else:
+            message = "❌ Lỗi: Không nhận được phản hồi hợp lệ từ API."
+
+    except Exception as e:
+        message = f"❌ Lỗi không xác định: {str(e)}"
+
+    context.bot.send_message(chat_id, message)
 # Chạy đồng thời bot và schedule
 def run_schedule_and_bot():
     while True:
