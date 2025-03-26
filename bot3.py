@@ -214,8 +214,6 @@ def send_long_message(chat_id, text):
     for i in range(0, len(text), max_length):
         bot.send_message(chat_id, text[i:i+max_length])
 
-import re  # Import thư viện để xử lý định dạng câu Kinh Thánh
-
 @bot.message_handler(func=lambda message: True)  # Xử lý tất cả tin nhắn
 def auto_detect_bible_verse(message):
     try:
