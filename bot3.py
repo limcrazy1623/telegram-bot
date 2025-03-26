@@ -176,7 +176,7 @@ def find_bible_verse(book, chapter, verse):
     found_verse = False
     verse_text = ""
 
-    book = book.strip().lower()  # Xoá khoảng trắng & chuyển chữ thường
+    book = book.strip().lower()  # Xoá khoảng trắng thừa & chuyển chữ thường
 
     for line in lines:
         line = line.strip()
@@ -184,8 +184,8 @@ def find_bible_verse(book, chapter, verse):
         if not line:  # Bỏ qua dòng trống
             continue
 
-        # 🔹 Tìm sách Kinh Thánh
-        if line.lower() == book:
+        # 🔹 Tìm sách Kinh Thánh (không phân biệt hoa/thường, bỏ khoảng trắng)
+        if line.strip().lower() == book:
             found_book = True
             found_chapter = False
             continue
@@ -210,6 +210,7 @@ def find_bible_verse(book, chapter, verse):
                 verse_text += " " + line  # Nối thêm nội dung
 
     return f"{book.title()} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
+
 
 def send_long_message(chat_id, text):
     """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
