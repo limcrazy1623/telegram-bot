@@ -149,20 +149,19 @@ def get_revenue(message):
 
         try:
             url = f"{APP_SCRIPT_URL}?action=doanhthu&month={month}"
-            response = requests.get(url)
-            data = json.loads(response.text)
+response = requests.get(url)
 
-            if "tong_tien" in data and "tien_in" in data and "tien_loi" in data:
-                reply = (f"📅 Doanh thu tháng {month}:\n"
-                         f"💰 Tổng tiền: {data['tong_tien']} VND\n"
-                         f"🖨️ Tiền in: {data['tien_in']} VND\n"
-                         f"💵 Tiền lời: {data['tien_loi']} VND")
-            else:
-                reply = "❌ Không lấy được dữ liệu doanh thu, vui lòng kiểm tra lại."
-
-            bot.send_message(chat_id, reply)
-        except Exception as e:
-            bot.send_message(chat_id, f"❌ Lỗi: {str(e)}")
+if response.status_code == 200 and response.text.strip():
+    try:
+        data = json.loads(response.text)
+        bot.send_message(chat_id, f"📊 Doanh thu tháng {month}:\n"
+                                  f"💰 Tổng tiền: {data['tong_tien']} VND\n"
+                                  f"🖨️ Tiền in: {data['tien_in']} VND\n"
+                                  f"💵 Tiền lời: {data['tien_loi']} VND")
+    except json.JSONDecodeError:
+        bot.send_message(chat_id, "❌ Lỗi: Dữ liệu trả về không hợp lệ.")
+else:
+    bot.send_message(chat_id, "❌ Lỗi: Không nhận được phản hồi từ API.")
 
 # Chạy đồng thời bot và schedule
 def run_schedule_and_bot():
