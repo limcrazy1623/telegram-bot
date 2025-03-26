@@ -226,17 +226,16 @@ def auto_detect_bible_verse(message):
 
         book, chapter, verse = match.groups()
         chapter = int(chapter)
-        verse = str(verse)  # Chuyển số câu về dạng chuỗi
+        verse = int(verse)  # Chuyển số câu về dạng số nguyên
 
         # 🔥 Tìm câu Kinh Thánh trong file
-        verse_text = find_bible_verses(book, chapter, verse, max_verses=1)
+        verse_text = find_bible_verse(book, chapter, verse)  # ❌ Sửa lại tên hàm
 
         # 🔹 Gửi kết quả
         send_long_message(message.chat.id, f"📖 {verse_text}")
 
     except Exception as e:
-        bot.reply_to(message, f"❌ Lỗi: {str(e)}")
-# Chạy bot polling
+        bot.reply_to(message, f"❌ Lỗi: {str(e)}")# Chạy bot polling
 bot.polling(none_stop=True, interval=0)
 import telebot
 
