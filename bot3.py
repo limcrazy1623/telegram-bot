@@ -72,6 +72,8 @@ def send_lesson_by_text(message):
     
     bot.reply_to(message, response)
 
+# Định nghĩa múi giờ Việt Nam
+tz_vn = pytz.timezone('Asia/Ho_Chi_Minh')
 
 # Hàm gửi bài học tự động hàng ngày
 def send_daily_lesson():
