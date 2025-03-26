@@ -232,36 +232,6 @@ def get_bible_verse(message):
         bot.reply_to(message, f"📖 {verse_text}")
     except Exception as e:
         bot.reply_to(message, f"❌ Lỗi: {str(e)}")
-@bot.message_handler(regexp=r"doanh thu tháng (\d+)")
-def get_revenue(message):
-    chat_id = message.chat.id
-    match = re.search(r"(\d+)", message.text)
-    
-    if match:
-        month = match.group(1)
-        bot.send_message(chat_id, f"📊 Đang tính toán doanh thu tháng {month}...")
-
-        try:
-            url = f"{APP_SCRIPT_URL}?action=doanhthu&month={month}"
-            response = requests.get(url)
-
-            # Chuyển đổi dữ liệu trả về thành JSON
-            data = json.loads(response.text)
-
-            # Kiểm tra dữ liệu hợp lệ trước khi gửi tin nhắn
-            if "tong_tien" in data and "tien_in" in data and "tien_loi" in data:
-                reply = (f"Vâng! Thưa Sếp\n"
-                         f"📅 Doanh thu tháng {month}:\n"
-                         f"💰 Tổng tiền: {data['tong_tien']} VND\n"
-                         f"🖨️ Tiền in: {data['tien_in']} VND\n"
-                         f"💵 Tiền lời: {data['tien_loi']} VND")
-            else:
-                reply = "❌ Không lấy được dữ liệu doanh thu, vui lòng kiểm tra lại."
-
-            bot.send_message(chat_id, reply)
-
-        except Exception as e:
-            bot.send_message(chat_id, f"❌ Lỗi: {str(e)}")
 # Chạy bot polling
 bot.polling(none_stop=True, interval=0)
 import telebot
