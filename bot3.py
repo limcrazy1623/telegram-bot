@@ -138,14 +138,6 @@ def get_bible_verse(message):
     except Exception as e:
         bot.reply_to(message, f"❌ Lỗi: {str(e)}")
 
-import requests
-import json
-
-TOKEN = "7973266839:AAF5VPoQvApooSpPtCaqJUl0Iqdu16lfFJg"
-bot = telebot.TeleBot(TOKEN)
-
-APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHVTygxz9HgTgpq8KfHO2bcsE9j3IoV3mk1kFBwbl35qmRTLKvi7nEvrXrj09nzsGUsA/exec"
-
 def doanh_thu_thang(update, context):
     chat_id = update.message.chat_id
     text = update.message.text.lower()
