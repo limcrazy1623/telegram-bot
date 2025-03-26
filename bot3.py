@@ -7,7 +7,6 @@ import schedule
 import time
 import threading  # Thêm thư viện threading
 import pytz
-import re  #  THÊM DÒNG NÀY ĐỂ SỬA LỖI
 
 
 
@@ -168,7 +167,7 @@ schedule_thread.start()
 import time
 
 def find_bible_verse(book, chapter, verse):
-    with open("/mnt/data/kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
+    with open("kinh_thanh_updated.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     found_book = False
@@ -176,26 +175,24 @@ def find_bible_verse(book, chapter, verse):
     found_verse = False
     verse_text = ""
 
-    book = book.strip().lower()  # Xoá khoảng trắng thừa & chuyển chữ thường
-
     for line in lines:
         line = line.strip()
 
-        if not line:  # Bỏ qua dòng trống
+        if not line:  # Nếu dòng trống, bỏ qua
             continue
 
-        # 🔹 Tìm sách Kinh Thánh (không phân biệt hoa/thường, bỏ khoảng trắng)
-        if line.strip().lower() == book:
+        # Tìm sách
+        if line.lower() == book.lower():
             found_book = True
             found_chapter = False
             continue
 
-        # 🔹 Tìm chương
+        # Tìm chương
         if found_book and line.lower() == f"chương {chapter}".lower():
             found_chapter = True
             continue
 
-        # 🔹 Tìm câu Kinh Thánh
+        # Tìm câu
         if found_chapter:
             parts = line.split(" ", 1)  # Tách số câu và nội dung
             if len(parts) > 1 and parts[0].isdigit() and int(parts[0]) == verse:
@@ -203,14 +200,13 @@ def find_bible_verse(book, chapter, verse):
                 verse_text = parts[1]
                 continue
 
-            # Nếu đã tìm thấy câu, tiếp tục nối nội dung của câu dài
+            # Nếu đã tìm thấy câu, tiếp tục nối các dòng tiếp theo
             if found_verse:
-                if line[0].isdigit():  # Nếu dòng tiếp theo là số, đó là câu mới -> dừng lại
+                if line[0].isdigit():  # Nếu dòng mới bắt đầu bằng số, tức là câu mới -> dừng lại
                     break
                 verse_text += " " + line  # Nối thêm nội dung
 
-    return f"{book.title()} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
-
+    return f"{book} {chapter}:{verse} {verse_text}" if found_verse else "Không tìm thấy câu Kinh Thánh này."
 
 def send_long_message(chat_id, text):
     """ Chia nhỏ tin nhắn dài để tránh lỗi 414 trên Telegram """
@@ -218,28 +214,25 @@ def send_long_message(chat_id, text):
     for i in range(0, len(text), max_length):
         bot.send_message(chat_id, text[i:i+max_length])
 
-@bot.message_handler(func=lambda message: True)  # Xử lý tất cả tin nhắn
-def auto_detect_bible_verse(message):
+# Lệnh tìm câu Kinh Thánh trong Telegram Bot
+@bot.message_handler(commands=['bible'])
+def get_bible_verse(message):
     try:
-        query = message.text.strip()
+        query = message.text.replace('/bible ', '').strip()
+        parts = query.split(" ")
 
-        # 🔍 Kiểm tra định dạng "Sách Chương:Câu" bằng Regex
-        match = re.match(r"([\wÀ-Ỹà-ỹ-]+) (\d+):(\d+)", query)
-        if not match:
-            return  # Nếu tin nhắn không phải câu Kinh Thánh, bỏ qua
+        if len(parts) < 2 or ":" not in parts[1]:
+            bot.reply_to(message, "Vui lòng nhập theo định dạng: /bible Sách Chương:Câu\nVí dụ: /bible Thi-thiên 23:1")
+            return
 
-        book, chapter, verse = match.groups()
-        chapter = int(chapter)
-        verse = int(verse)  # Chuyển số câu về dạng số nguyên
+        book = parts[0]
+        chapter, verse = map(int, parts[1].split(":"))
+        verse_text = find_bible_verse(book, chapter, verse)
 
-        # 🔥 Tìm câu Kinh Thánh trong file
-        verse_text = find_bible_verse(book, chapter, verse)  # ❌ Sửa lại tên hàm
-
-        # 🔹 Gửi kết quả
-        send_long_message(message.chat.id, f"📖 {verse_text}")
-
+        bot.reply_to(message, f"📖 {verse_text}")
     except Exception as e:
-        bot.reply_to(message, f"❌ Lỗi: {str(e)}")# Chạy bot polling
+        bot.reply_to(message, f"❌ Lỗi: {str(e)}")
+# Chạy bot polling
 bot.polling(none_stop=True, interval=0)
 import telebot
 
