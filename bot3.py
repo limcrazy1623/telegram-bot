@@ -146,7 +146,6 @@ bot = telebot.TeleBot(TOKEN)
 
 APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHVTygxz9HgTgpq8KfHO2bcsE9j3IoV3mk1kFBwbl35qmRTLKvi7nEvrXrj09nzsGUsA/exec"
 
-@bot.message_handler(regexp=r"doanh thu tháng (\d+)")
 def doanh_thu_thang(update, context):
     chat_id = update.message.chat_id
     text = update.message.text.lower()
